@@ -2,10 +2,11 @@ package com.actyx.challenge.api
 
 import java.net.URL
 import java.nio.charset.Charset
+import java.util.UUID
 
 import com.actyx.challenge.api.MachinesEndpoint.MachineEndpoint
 import com.actyx.challenge.mappings._
-import org.http4s.Response
+import org.http4s.{Headers, MediaType, Response}
 import org.scalatest.{FunSuite, Matchers}
 import scodec.bits.ByteVector
 
@@ -21,7 +22,8 @@ class MachinesEndpointEntityBodyDecoderSuite
 
     val responseStr = endpoints.mkString("[\"", "\",\"", "\"]")
 
-    val response = Response(body = scalaz.stream.Process(ByteVector.view(responseStr.getBytes(Charset.forName("UTF-8")))))
+    val response = Response(body = scalaz.stream.Process(ByteVector.view(responseStr.getBytes(Charset.forName("UTF-8")))),
+                             headers = Headers(org.http4s.headers.`Content-Type`(MediaType.`application/json`)))
 
     // XXX: could probably make use of `AsyncFunSuite` and the fact that `scalaz.stream.Process` represents async computation
     val decoded  = MachinesEndpoint.`circeDecoder => EntityDecoder`[List[MachineEndpoint]].decode(response, strict = true).run.run
@@ -45,5 +47,11 @@ class MachinesEndpointEntityBodyDecoderSuite
 
     noException should be thrownBy endpoints
     assert(endpoints.forall(url => url.toString.startsWith("http://foo.bar")))
+  }
+
+  test("Returns ID of the machine from the endpoint URL.") {
+    val url = "$API_ROOT/machine/0e079d74-3fce-42c5-86e9-0a4ecc9a26c5"
+    val m   = MachineEndpoint(url)
+    assert(m.getID === UUID.fromString("0e079d74-3fce-42c5-86e9-0a4ecc9a26c5"))
   }
 }
