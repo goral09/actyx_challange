@@ -25,8 +25,6 @@ class EnvSensorMappingSuite
 
     val decoded = io.circe.parser.decode[EnvSensor](input)
 
-    println(decoded)
-
     assert(decoded.exists(_ === expected))
   }
 
