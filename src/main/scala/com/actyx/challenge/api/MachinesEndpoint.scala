@@ -18,7 +18,6 @@ import org.http4s.circe.jsonOf
 import org.http4s.client.blaze._
 
 import scala.concurrent.duration.FiniteDuration
-import scalaz.concurrent.Task
 
 class MachinesEndpoint(
   apiRoot: URL,
@@ -32,22 +31,23 @@ class MachinesEndpoint(
   private lazy val tickSource =
     Observable.interval(FiniteDuration(samplingFrequency.interval.toLong * 1000, TimeUnit.MILLISECONDS))
 
-  // TODO add error handling
-  // Can check the response if "too many requests" -> retry in X seconds
-  private val machinesList: Task[List[MachineEndpoint]] =
-    client.expect[List[MachineEndpoint]](machinesEndpoint.toString)
+  private val machinesList: monix.eval.Task[List[MachineEndpoint]] =
+    monix.eval.Task.evalAlways(client.expect[List[MachineEndpoint]](machinesEndpoint.toString).run)
 
-  private def machineRequest(url: URL): Task[Machine] =
-    client.expect[Machine](url.toString)
+  private def machineRequest(url: URL): monix.eval.Task[Machine] =
+    monix.eval.Task.evalAlways(client.expect[Machine](url.toString).run)
+    .onErrorHandleWith {
+      case ex@org.http4s.client.UnexpectedStatus(status) if status.code == 429 =>
+        machineRequest(url).delayExecution(FiniteDuration(5000L, TimeUnit.MILLISECONDS))
+    }
 
   override def unsafeSubscribeFn(subscriber: Subscriber[(MachineID, Machine)]): Cancelable =
-    tickSource.flatMap { _ =>
-      Observable.fromTask(monix.eval.Task.evalAlways(machinesList.run))
-        .flatMap { endpoints =>
-          val requests = endpoints.map { e => e.getID -> machineRequest(e.toURL(apiRoot))}
-          Observable.merge(requests.map { case (uuid, r) =>
-            Observable.fromTask(monix.eval.Task.evalAlways(r.run).map(uuid -> _)) }:_*)
-        }
+    Observable.fromTask(machinesList).flatMap { endpoints =>
+      val requests = endpoints.map { e => e.getID -> machineRequest(e.toURL(apiRoot))}
+      tickSource.flatMap { _ =>
+        Observable.merge(requests.map { case (uuid, r) =>
+          Observable.fromTask(r.map(uuid -> _)) }:_*)
+      }
     }.subscribe(subscriber)
 }
 
