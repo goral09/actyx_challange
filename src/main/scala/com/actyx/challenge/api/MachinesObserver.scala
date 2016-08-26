@@ -11,7 +11,7 @@ import monix.reactive.Observer
 
 import scala.concurrent.Future
 
-class MachinesObserver[T <: AlarmLogger](logger: T)
+class MachinesObserver[T <: AlarmLogger](loggers: T*)
   extends Observer[(MachineID, Machine)] {
 
   private val machines = new MachinesState()
@@ -20,7 +20,7 @@ class MachinesObserver[T <: AlarmLogger](logger: T)
     val (mId, m) = elem
     val (_, alarm) = machines.update(mId, m.current, m.current_alert)
     alarm foreach { case (id, curr, alarm) =>
-      logger.log(MachineAlarm(m))
+      loggers.foreach(_.log(MachineAlarm(m)))
     }
     Continue
   }
@@ -33,6 +33,7 @@ class MachinesObserver[T <: AlarmLogger](logger: T)
 }
 
 object MachinesObserver {
+  def apply[T <: AlarmLogger](loggers: T*) = new MachinesObserver[T](loggers:_*)
   def apply[T <: AlarmLogger](logger: T = StdOutLogger) = new MachinesObserver[T](logger)
 
   class MachinesState {
