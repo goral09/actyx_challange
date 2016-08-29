@@ -18,9 +18,9 @@ class MachinesObserver[T <: AlarmLogger](loggers: T*)
 
   override def onNext(elem: (MachineID, Machine)): Future[Ack] = {
     val (mId, m) = elem
-    val (_, alarm) = machines.update(mId, m.current, m.current_alert)
-    alarm foreach { case (id, curr, alarm) =>
-      loggers.foreach(_.log(MachineAlarm(m)))
+    val (_, alarm) = machines.update(mId, m.current, m.currentAlert)
+    alarm foreach { case (id, curr, al_curr) =>
+      loggers.foreach(_.log(MachineAlarm(id, m.timestamp, curr, al_curr)))
     }
     Continue
   }

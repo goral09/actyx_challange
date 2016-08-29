@@ -11,7 +11,7 @@ object AlarmLogger {
   object StdOutLogger
     extends AlarmLogger {
     override def log(alarm: MachineAlarm): Unit = {
-      val msg = "Machine %35s exceeded current alarm level: %2.3f / %2.3f".format(alarm.machine.name, alarm.machine.current, alarm.machine.current_alert)
+      val msg = "Machine %35s exceeded current alarm level: %2.3f / %2.3f".format(alarm.id, alarm.current, alarm.currentAlert)
       println(msg)
     }
   }

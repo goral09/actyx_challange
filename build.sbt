@@ -1,4 +1,8 @@
+import sbt.Project.projectToRef
+
 version := "1.0"
+
+lazy val scalaV = "2.11.8"
 
 lazy val circeDependencies = Seq(
   "io.circe" %% "circe-core",
@@ -23,7 +27,7 @@ lazy val http4sDependencies = Seq(
    "org.http4s" %% "http4s-circe"
 ).map(_ % "0.14.2")
 
-lazy val otherDependencies = Seq(
+lazy val dateTimeDependencies = Seq(
   "joda-time" % "joda-time" % "2.9.4")
 
 lazy val dependencies = monixDependencies ++
@@ -31,18 +35,39 @@ lazy val dependencies = monixDependencies ++
   akkaDependencies  ++
   http4sDependencies ++
   testDependencies ++
-  otherDependencies
+  dateTimeDependencies
 
 lazy val commonSettings = Seq(
   name := "actyx-challenge",
   version := "0.1.0",
-  scalaVersion := "2.11.8")
+  scalaVersion := scalaV)
 
-lazy val root = (project in file("."))
+lazy val shared = (crossProject.crossType(CrossType.Pure) in file ("shared"))
+  .settings(
+     scalaVersion := scalaV,
+     libraryDependencies ++= dateTimeDependencies)
+
+lazy val sharedJvm = shared.jvm
+lazy val sharedJs = shared.js
+
+lazy val client = (project in file ("client"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(sharedJs)
+  .settings(
+    scalaVersion := scalaV,
+    persistLauncher := true,
+    persistLauncher in Test := false,
+    //    sourceMapsDirectories += sharedJs.base / "..",
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % "0.9.0",
+      "io.monix" %%% "monix" % "2.0-RC9"))
+
+lazy val server = (project in file("server"))
   .settings(commonSettings:_*)
   .settings(
     resolvers ++= Seq(
       "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
       Resolver.sonatypeRepo("snapshots")),
-    libraryDependencies ++= dependencies
-  )
+    libraryDependencies ++= dependencies)
+  .aggregate(client)
+  .dependsOn(projectToRef(sharedJvm))

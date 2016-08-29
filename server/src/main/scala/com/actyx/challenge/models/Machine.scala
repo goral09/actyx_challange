@@ -12,7 +12,7 @@ case class Machine(
   location: Machine.Location,
   timestamp: LocalDateTime,
   current: Double,
-  current_alert: Double)
+  currentAlert: Double)
 
 object Machine {
   type MachineID = UUID
