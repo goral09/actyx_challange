@@ -2,10 +2,14 @@ package com.actyx.challenge.models
 
 import java.util.UUID
 
-import org.joda.time.LocalDateTime
-
 case class MachineAlarm(
   id: UUID,
-  timestamp: LocalDateTime,
+  timestamp: Long,
   current: Double,
   currentAlert: Double) extends Product with Serializable
+
+object MachineAlarm {
+  def sample = MachineAlarm(UUID.randomUUID(), scala.util.Random.nextLong(),
+                             scala.util.Random.nextDouble() % 10,
+                             scala.util.Random.nextDouble() % 10)
+}
