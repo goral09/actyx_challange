@@ -14,6 +14,13 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-http-experimental" % VersionOf.akka,
     "com.typesafe.akka" %% "akka-http-core"         % VersionOf.akka)
 
+	lazy val `akka-actor` = Seq(
+		"com.typesafe.akka" %% "akka-actor" % VersionOf.akka,
+		"com.typesafe.akka" %% "akka-slf4j" % VersionOf.akka)
+
+	lazy val `akka-sse` = Seq(
+		"de.heikoseeberger" %% "akka-sse" % VersionOf.`akka-sse`)
+
   lazy val testDependencies = Seq(
     "org.scalatest" %% "scalatest" % VersionOf.`scala-test` % "test")
 
@@ -26,17 +33,32 @@ object Dependencies {
   lazy val dateTimeDependencies = Seq(
     "joda-time" % "joda-time" % VersionOf.`joda-time`)
 
-  lazy val loggingDependencies = Seq(
-    "com.typesafe.scala-logging" %% "scala-logging" % VersionOf.`scala-logging`)
+	lazy val loggingLibs = Seq(
+		// The SLF4J, LOG4J and ScalaLogging combination is dependent on the
+		// order of deps, the exact packages, and the alignment of Venus; it may
+		// collapse if you look at it wrong. Adjust with care and reload often...
+		// (just watch out for libraries that override `log4j-slf4j-impl`, or
+		//  bring in another package with the same purpose)
+
+		"org.apache.logging.log4j" % "log4j-core",
+		"org.apache.logging.log4j" % "log4j-api",
+		"org.apache.logging.log4j" % "log4j-web",
+		"org.apache.logging.log4j" % "log4j-slf4j-impl").map(_ % VersionOf.log4j) ++
+	Seq(
+		"com.typesafe.scala-logging" %% "scala-logging" % VersionOf.`scala-logging`,
+		"com.lmax" % "disruptor" % VersionOf.disruptor) // async logging
 
   lazy val `typesafe-config` = Seq(
     "com.typesafe" % "config" % VersionOf.`typesafe-config`)
 
   lazy val dependencies = monixDependencies ++
     circeDependencies ++
+	  `akka-sse` ++
     `akka-http`  ++
     http4sDependencies ++
     testDependencies ++
+		`typesafe-config` ++
+	  loggingLibs ++
     dateTimeDependencies
 
 }

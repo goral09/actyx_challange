@@ -7,4 +7,7 @@ object VersionOf {
   val akka = "2.4.8"
   val monix = "2.0-RC10"
 	val circe = "0.4.1"
+	val log4j = "2.3"
+	val disruptor = "3.3.2"
+	val `akka-sse` = "1.10.0"
 }
