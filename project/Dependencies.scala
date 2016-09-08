@@ -14,6 +14,9 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-http-experimental" % VersionOf.akka,
     "com.typesafe.akka" %% "akka-http-core"         % VersionOf.akka)
 
+	lazy val `akka-cors` = Seq(
+    "ch.megard" %% "akka-http-cors" % VersionOf.`akka-cors`)
+
 	lazy val `akka-actor` = Seq(
 		"com.typesafe.akka" %% "akka-actor" % VersionOf.akka,
 		"com.typesafe.akka" %% "akka-slf4j" % VersionOf.akka)
@@ -55,6 +58,7 @@ object Dependencies {
     circeDependencies ++
 	  `akka-sse` ++
     `akka-http`  ++
+    `akka-cors`  ++
     http4sDependencies ++
     testDependencies ++
 		`typesafe-config` ++
