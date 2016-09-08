@@ -2,7 +2,7 @@ package client
 
 import java.util.UUID
 
-import com.actyx.challenge.api.MachinesStateObserver.MachinesState
+import com.actyx.challenge.api.MachinesObserver.MachinesState
 import org.scalatest.FunSuite
 
 class MachinesStateRegistrySuite
