@@ -26,7 +26,6 @@ lazy val client = (project in file ("client"))
     persistLauncher := true,
     persistLauncher in Test := false,
     scalaJSUseRhino in Global := false,
-    //    sourceMapsDirectories += sharedJs.base / "..",
     libraryDependencies ++=
       dateTimeDependencies ++ Seq(
         "org.scala-js"  %%% "scalajs-dom" % "0.9.0",
@@ -38,8 +37,10 @@ lazy val server = (project in file("server"))
   .settings(
     resolvers ++= Seq(
       "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
+			Resolver.bintrayRepo("hseeberger", "maven"),
       Resolver.sonatypeRepo("snapshots")),
-    libraryDependencies ++= dependencies ++ Seq("org.webjars" % "jquery" % "1.12.3"),
+    libraryDependencies ++= dependencies,
+    libraryDependencies ++= Seq("org.webjars" % "jquery" % "1.12.3"),
     (resourceGenerators in Compile) <+= (fastOptJS in Compile in client)
              .map(f => Seq(f.data)),
     watchSources <++= (watchSources in client))
