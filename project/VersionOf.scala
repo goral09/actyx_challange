@@ -10,4 +10,5 @@ object VersionOf {
 	val log4j = "2.3"
 	val disruptor = "3.3.2"
 	val `akka-sse` = "1.10.0"
+	val `akka-cors` = "0.1.5"
 }
