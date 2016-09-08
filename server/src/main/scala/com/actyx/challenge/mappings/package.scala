@@ -38,7 +38,8 @@ package object mappings {
 
   implicit val decoderMachinesEndpoint: Decoder[MachineEndpoint] = Decoder[String].map(MachineEndpoint)
   implicit val decodeListMachines: Decoder[List[MachineEndpoint]] = Decoder[Set[MachineEndpoint]].map(_.toList)
-
+  implicit val encoderMachineAlarm: Encoder[MachineAlarm] = io.circe.generic.semiauto.deriveEncoder[MachineAlarm]
+  implicit val decoderMachineAlarm: Decoder[MachineAlarm] = io.circe.generic.semiauto.deriveDecoder[MachineAlarm]
 }
 
 object commons {
