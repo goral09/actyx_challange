@@ -1,10 +1,10 @@
 package com.actyx.challenge.api
 
+import client.AlarmLogger
+import client.AlarmLogger.StdOutLogger
 import com.actyx.challenge.api.MachinesObserver.MachinesState
-import com.actyx.challenge.alarms.AlarmLogger
-import com.actyx.challenge.alarms.AlarmLogger.StdOutLogger
-import com.actyx.challenge.models.{Machine, MachineAlarm}
 import com.actyx.challenge.models.Machine._
+import com.actyx.challenge.models.{Machine, MachineAlarm}
 import monix.execution.Ack
 import monix.execution.Ack.Continue
 import monix.reactive.Observer
@@ -20,7 +20,7 @@ class MachinesObserver[T <: AlarmLogger](loggers: T*)
     val (mId, m) = elem
     val (_, alarm) = machines.update(mId, m.current, m.currentAlert)
     alarm foreach { case (id, curr, al_curr) =>
-      loggers.foreach(_.log(MachineAlarm(id, m.timestamp, curr, al_curr)))
+      loggers.foreach(_.log(MachineAlarm(id, m.timestamp.toDateTime.getMillis, curr, al_curr)))
     }
     Continue
   }
@@ -33,7 +33,6 @@ class MachinesObserver[T <: AlarmLogger](loggers: T*)
 }
 
 object MachinesObserver {
-  def apply[T <: AlarmLogger](loggers: T*) = new MachinesObserver[T](loggers:_*)
   def apply[T <: AlarmLogger](logger: T = StdOutLogger) = new MachinesObserver[T](logger)
 
   class MachinesState {
