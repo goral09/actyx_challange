@@ -1,8 +1,8 @@
-package com.actyx.challenge.alarms
+package client
 
 import java.util.UUID
 
-import com.actyx.challenge.api.MachinesObserver.MachinesState
+import com.actyx.challenge.api.MachinesStateObserver.MachinesState
 import org.scalatest.FunSuite
 
 class MachinesStateRegistrySuite
