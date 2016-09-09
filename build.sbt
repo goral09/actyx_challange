@@ -41,6 +41,9 @@ lazy val server = (project in file("server"))
       Resolver.sonatypeRepo("snapshots")),
     libraryDependencies ++= dependencies,
     libraryDependencies ++= Seq("org.webjars" % "jquery" % "1.12.3"),
+		 // Heroku specific
+		 herokuAppName in Compile := "actyx-challenge",
+		 herokuSkipSubProjects in Compile := false,
     (resourceGenerators in Compile) <+= (fastOptJS in Compile in client)
              .map(f => Seq(f.data)),
     watchSources <++= (watchSources in client))
