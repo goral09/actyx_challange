@@ -45,6 +45,6 @@ final class AlarmList(element: String, listSize: Int = 100)
   override def onComplete(): Unit = ()
 
   override def onError(ex: Throwable): Unit = {
-    System.err.println(s"ERROR: $ex")
+    Utils.log(s"ERROR: $ex")
   }
 }

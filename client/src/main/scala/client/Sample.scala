@@ -10,13 +10,14 @@ import monix.reactive.OverflowStrategy.DropNew
 import scala.scalajs.js.JSApp
 
 object Sample extends JSApp {
-  override def main(): Unit = {  }
+  override def main(): Unit = {
+	  // TODO: get from config
+	  val alarms: Observable[MachineAlarm] =
+	    new AlarmConsumer("http://localhost:8888/api/v1/alarms", DropNew(1000))
 
-  // TODO: get from config
-  val alarms: Observable[MachineAlarm] =
-    new AlarmConsumer("http://0.0.0.0:8080/api/v1/alarms", DropNew(1000))
+	  alarms
+		  .subscribe(new AlarmList("alarms-list"))
 
-  alarms
-    .subscribe(new AlarmList("alarms-list"))
+  }
 
 }
