@@ -47,6 +47,12 @@ object Main extends App with Logger {
 		                                                    allowedOrigins = HttpOriginRange.*)
 
 	val route =
+		get {
+			pathEndOrSingleSlash {
+				getFromResource("web/index.html")
+			} ~ path("client-fastopt.js")(getFromResource("client-fastopt.js")) ~
+				  path("client-jsdeps.js")(getFromResource("client-jsdeps.js"))
+		} ~
 		ch.megard.akka.http.cors.CorsDirectives.cors(corsSettings) {
 			pathPrefix("api" / "v1") {
 				pathPrefix("alarms") {
@@ -63,7 +69,7 @@ object Main extends App with Logger {
 			}
 		}
 
-	val serverBindings = Http().bindAndHandle(Route.handlerFlow(route), "0.0.0.0", 8080)
+	val serverBindings = Http().bindAndHandle(Route.handlerFlow(route), "localhost", 8888)
 
 	serverBindings.foreach { connection ⇒
 		logger.info(s"Started connection with $connection")
