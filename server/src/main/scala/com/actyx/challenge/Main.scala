@@ -46,6 +46,8 @@ object Main extends App with Logger {
 	val corsSettings = CorsSettings.defaultSettings.copy(allowGenericHttpRequests = true,
 		                                                    allowedOrigins = HttpOriginRange.*)
 
+	val port = Option(System.getProperty("http.port")).map(_.toInt).getOrElse(8888)
+
 	val route =
 		get {
 			pathEndOrSingleSlash {
@@ -69,11 +71,7 @@ object Main extends App with Logger {
 			}
 		}
 
-	val serverBindings = Http().bindAndHandle(Route.handlerFlow(route), "localhost", 8888)
-
-	serverBindings.foreach { connection ⇒
-		logger.info(s"Started connection with $connection")
-	}(executor)
+	val serverBindings = Http().bindAndHandle(Route.handlerFlow(route), "0.0.0.0", port)
 
 	Logger.info("Entrypoint UP")
 	sys.addShutdownHook {
