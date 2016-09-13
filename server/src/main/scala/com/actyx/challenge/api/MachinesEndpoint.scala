@@ -8,7 +8,7 @@ import com.actyx.challenge.api.MachinesEndpoint._
 import com.actyx.challenge.mappings._
 import com.actyx.challenge.models.Machine
 import com.actyx.challenge.models.Machine.MachineID
-import com.actyx.challenge.util.Frequency
+import com.actyx.challenge.util.{Frequency, Logger}
 import io.circe.Decoder
 import monix.execution.Cancelable
 import monix.reactive.Observable
@@ -22,7 +22,7 @@ import scala.concurrent.duration.FiniteDuration
 class MachinesEndpoint(
   apiRoot: URL,
   machinesEndpoint: URL,
-  samplingFrequency: Frequency) extends Observable[(MachineID, Machine)] {
+  samplingFrequency: Frequency) extends Observable[(MachineID, Machine)] with Logger {
 
   require(samplingFrequency.interval > 0.2,
            s"Minimal sampling frequency is 0.2Hz ( 1/(5 seconds) ). Was ${samplingFrequency.interval}")
@@ -37,18 +37,18 @@ class MachinesEndpoint(
   private def machineRequest(url: URL): monix.eval.Task[Machine] =
     monix.eval.Task.evalAlways(client.expect[Machine](url.toString).run)
     .onErrorHandleWith {
-      case ex@org.http4s.client.UnexpectedStatus(status) if status.code == 429 =>
+      case ex@org.http4s.client.UnexpectedStatus(status) if status.code == 429 ⇒
         machineRequest(url).delayExecution(FiniteDuration(5000L, TimeUnit.MILLISECONDS))
     }
 
   override def unsafeSubscribeFn(subscriber: Subscriber[(MachineID, Machine)]): Cancelable =
-    Observable.fromTask(machinesList).flatMap { endpoints =>
-      val requests = endpoints.map { e => e.getID -> machineRequest(e.toURL(apiRoot))}
-      tickSource.flatMap { _ =>
-        Observable.merge(requests.map { case (uuid, r) =>
-          Observable.fromTask(r.map(uuid -> _)) }:_*)
-      }
-    }.subscribe(subscriber)
+    Observable.fromTask(machinesList).flatMap { endpoints ⇒
+      Observable.fromIterable(endpoints)
+        .map { e ⇒ e.getID -> machineRequest(e.toURL(apiRoot))}
+        .flatMap { case (uuid, r) ⇒
+          Observable.fromTask(r.map(uuid -> _))
+        }
+      }.subscribe(subscriber)
 }
 
 object MachinesEndpoint {
