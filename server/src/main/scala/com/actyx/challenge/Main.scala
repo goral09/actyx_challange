@@ -71,12 +71,16 @@ object Main extends App with Logger {
 			}
 		}
 
-	val serverBindings = Http().bindAndHandle(Route.handlerFlow(route), "0.0.0.0", port)
+	val serverBindings = Http()
+	  .bindAndHandle(Route.handlerFlow(route), "0.0.0.0", port)
+		.map { binding ⇒
+		  logger.info("Entrypoint UP")
+	    binding
+		}(executor)
 
-	Logger.info("Entrypoint UP")
 	sys.addShutdownHook {
-		serverBindings.foreach(_.unbind)(this.executor)
+		serverBindings.foreach(_.unbind)(executor)
 //		consoleLogger.cancel()
-		Logger.info("Entrypoint DOWN")
+		logger.info("Entrypoint DOWN")
 	}
 }
