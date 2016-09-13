@@ -7,6 +7,7 @@ import monix.reactive.Observer
 
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.scalajs.js.Date
 import scala.scalajs.js.Dynamic._
 
 final class AlarmList(element: String, listSize: Int = 100)
@@ -18,7 +19,7 @@ final class AlarmList(element: String, listSize: Int = 100)
 	  global.jQuery(s"#$element").append("<ul></ul>").find("ul")
 
 	private def serialize(alarm: MachineAlarm):js.Dynamic =
-		global.jQuery(s"<li>${alarm.toString}</li>")
+		global.jQuery(s"<li>${new Date(alarm.timestamp.toDouble)}\t${alarm.id}\tCurrent: ${alarm.current}\tAlarm level: ${alarm.currentAlert}</li>")
 
 	private def appendAlarm(alarm: js.Dynamic)(list: js.Dynamic) =
 		alarm appendTo list
