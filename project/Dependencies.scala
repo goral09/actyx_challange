@@ -36,6 +36,9 @@ object Dependencies {
   lazy val dateTimeDependencies = Seq(
     "joda-time" % "joda-time" % VersionOf.`joda-time`)
 
+	lazy val shapelessLibs = Seq(
+    "com.chuusai" %% "shapeless" % VersionOf.shapeless)
+
 	lazy val loggingLibs = Seq(
 		// The SLF4J, LOG4J and ScalaLogging combination is dependent on the
 		// order of deps, the exact packages, and the alignment of Venus; it may
@@ -63,6 +66,7 @@ object Dependencies {
     testDependencies ++
 		`typesafe-config` ++
 	  loggingLibs ++
-    dateTimeDependencies
+    dateTimeDependencies ++
+		shapelessLibs
 
 }
