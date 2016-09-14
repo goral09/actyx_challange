@@ -65,7 +65,4 @@ object MachinesEndpoint {
   implicit def `circeDecoder => EntityDecoder`[T : Decoder]: EntityDecoder[T] =
     jsonOf[T]
 
-  final val MACHINES_LIST = "machines_list"
-  final val ENV_SENSOR = "env_sensor"
-  final val MACHINE_DETAIL = "machine_detail"
 }
