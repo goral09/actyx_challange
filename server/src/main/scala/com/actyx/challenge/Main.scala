@@ -11,7 +11,6 @@ import akka.http.scaladsl.model.headers.HttpOriginRange
 import akka.http.scaladsl.server.Route
 import ch.megard.akka.http.cors.CorsSettings
 import com.actyx.challenge.config.{Config, TypeSafeConfig}
-import com.actyx.challenge.models.MachineAlarm
 import com.typesafe.config.ConfigFactory
 
 object Main extends App with Logger {
@@ -22,16 +21,11 @@ object Main extends App with Logger {
 
 	val machines = compositionRoot.machinesState
 
-	val machineAlarms = for {
-		(mId, m) ← machines
-		if m.current > m.currentAlert
-	} yield MachineAlarm(mId, m.timestamp.toDateTime.getMillis, m.current, m.currentAlert)
-
 	implicit val system = ActorSystem()
 	implicit val executor = system.dispatcher
 	implicit val materializer = ActorMaterializer()
 
-	val alarmsRoute = new MachineAlarmsService(config.serverConfig)(machineAlarms).route
+	val alarmsRoute = new MachineAlarmsService(config.serverConfig)(machines).route
 
 	val corsSettings = CorsSettings.defaultSettings.copy(allowGenericHttpRequests = true,
 		                                                    allowedOrigins = HttpOriginRange.*)
@@ -46,7 +40,7 @@ object Main extends App with Logger {
 
 
 	val serverBindings = Http()
-	  .bindAndHandle(Route.handlerFlow(route), "0.0.0.0", config.serverConfig.port)
+	  .bindAndHandle(Route.handlerFlow(route), config.serverConfig.host, config.serverConfig.port)
 		.map { binding ⇒
 		  logger.info("Entrypoint UP")
 	    binding
