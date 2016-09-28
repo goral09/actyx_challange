@@ -13,6 +13,7 @@ import io.circe.Decoder
 import monix.execution.Cancelable
 import monix.reactive.Observable
 import monix.reactive.observers.Subscriber
+import monix.execution.Scheduler.Implicits.global
 import org.http4s._
 import org.http4s.circe.jsonOf
 import org.http4s.client.blaze._
@@ -34,9 +35,13 @@ class MachinesEndpoint(
 
   private val machinesList: monix.eval.Task[List[MachineEndpoint]] =
     monix.eval.Task.evalAlways(client.expect[List[MachineEndpoint]](machinesEndpoint.toString).run)
-	  .onErrorHandleWith { ex ⇒
-	    logger.error(s"Encountered an error when requesting machines list.", ex)
-		  monix.eval.Task.raiseError(ex)
+	  .onErrorHandleWith {
+		  case ex@org.http4s.client.UnexpectedStatus(status) if status.code == 429 ⇒
+		    logger.error("Too many requests.", ex)
+		    machinesList.delayExecution(FiniteDuration(5000L, TimeUnit.MILLISECONDS))
+		  case ex ⇒
+			  logger.error("Unknown error.", ex)
+			  monix.eval.Task.raiseError(ex)
 	  }
 
   private def getMachineState(url: URL): monix.eval.Task[Machine] =
