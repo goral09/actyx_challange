@@ -28,8 +28,9 @@ final class AlarmConsumer(uri: String, os: OverflowStrategy.Synchronous[String])
         val timestamp = json.timestamp.asInstanceOf[Double].toLong
         val current = json.current.asInstanceOf[Double]
         val currentAlert = json.currentAlert.asInstanceOf[Double]
+        val avgCurrent = json.average.asInstanceOf[Double]
 
-        MachineAlarm(id, timestamp, current, currentAlert)
+        MachineAlarm(id, timestamp, current, currentAlert, avgCurrent)
       }.toOption
     }
   }

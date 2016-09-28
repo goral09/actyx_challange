@@ -1,5 +1,10 @@
 package com.actyx.challenge.config
 
+import java.util.concurrent.TimeUnit
+
+import scala.concurrent.duration.FiniteDuration
+import com.actyx.challenge.util._
+
 class Config private(
 	val actyxParkConfig: Config.ActyxMachineParkAPIConfig,
 	val serverConfig: Config.ServerConfig
@@ -8,7 +13,8 @@ class Config private(
 object Config {
 	case class ActyxMachineParkAPIConfig(
 		apiRoot: String,
-		reqFrequency: Double)
+		reqFrequency: Double,
+		movingAvgWindowSize: FiniteDuration)
 
 	case class ServerConfig(
 		host: String,
@@ -18,7 +24,12 @@ object Config {
 		val actyxConfig = {
 			val apiRoot = conf.getSystemProperty("actyx.api.root")
 			val reqFreq = conf.systemProperty("actyx.machine.frequency").map(_.toDouble).getOrElse(0.21)
-			ActyxMachineParkAPIConfig(apiRoot,reqFreq)
+			val movingAvgWindowSize = {
+				val dur = conf.systemProperty("actyx.machine.averagePeriod")
+				if(dur.nonEmpty) dur.get.toFiniteDuration
+				else FiniteDuration(5, TimeUnit.SECONDS)
+			}
+			ActyxMachineParkAPIConfig(apiRoot,reqFreq, movingAvgWindowSize)
 		}
 
 		val serverConfig = {

@@ -19,7 +19,12 @@ final class AlarmList(element: String, listSize: Int = 100)
 	  global.jQuery(s"#$element").append("<ul></ul>").find("ul")
 
 	private def serialize(alarm: MachineAlarm):js.Dynamic =
-		global.jQuery(s"<li>${new Date(alarm.timestamp.toDouble)}\t${alarm.id}\tCurrent: ${alarm.current}\tAlarm level: ${alarm.currentAlert}</li>")
+		global.jQuery(s"<li>" +
+			s"Timestamp: ${new Date(alarm.timestamp.toDouble)}\t" +
+			s"MachineID: ${alarm.id}\t" +
+			s"Current: ${alarm.current}\t" +
+			s"Alarm level: ${alarm.currentAlert}\t" +
+			s"Moving average ( 5 seconds ): ${alarm.average}</li>")
 
 	private def appendAlarm(alarm: js.Dynamic)(list: js.Dynamic) =
 		alarm appendTo list
