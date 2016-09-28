@@ -24,7 +24,7 @@ final class AlarmList(element: String, listSize: Int = 100)
 			s"MachineID: ${alarm.id}\t" +
 			s"Current: ${alarm.current}\t" +
 			s"Alarm level: ${alarm.currentAlert}\t" +
-			s"Moving average ( 5 seconds ): ${alarm.average}</li>")
+			s"Moving average ( 5 minutes ): ${alarm.average}</li>")
 
 	private def appendAlarm(alarm: js.Dynamic)(list: js.Dynamic) =
 		alarm appendTo list
