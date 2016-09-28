@@ -20,9 +20,11 @@ import scala.concurrent.duration._
 class MachineAlarmsService(
 	config: Config.ServerConfig,
 	movingAvgWindowSize: FiniteDuration)(
-	machines: Observable[(MachineID, Machine)]) extends Logger {
+	machines0: Observable[(MachineID, Machine)]) extends Logger {
 
 	private val averages = AtomicAny[State](new State())
+
+	private val machines = machines0.share
 
 	val alarms = for {
 		(mId, m) ← machines
@@ -30,6 +32,8 @@ class MachineAlarmsService(
 		if m.current > m.currentAlert
 	} yield MachineAlarm(mId, m.timestamp.toDateTime.getMillis, m.current, m.currentAlert, avg)
 
+	// group data into time-width windows
+	// and compute average current drawn within this time window
 	machines
 		.bufferTimed(movingAvgWindowSize)
 		.map(_.groupBy(_._1)
@@ -39,6 +43,11 @@ class MachineAlarmsService(
 		      }
     )
 		.foreach(_.foreach(d ⇒ averages.get.update(d._1 → d._2)))
+
+	// testing purposes
+	machines
+		.filter  { case (id, m) ⇒ m.current > m.currentAlert }
+	  .foreach { case (id, m) ⇒ logger.debug(s"$id \t ${m.timestamp} \t ${m.current}")}
 
 	val route =
 		pathPrefix("api" / "v1") {
