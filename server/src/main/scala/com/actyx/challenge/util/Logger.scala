@@ -11,4 +11,5 @@ object Logger extends Logger {
 	def info(msg: String) = logger.info(msg)
 	def error(msg: String) = logger.error(msg)
 	def warn(msg: String) = logger.warn(msg)
+	def trace(msg: String) = logger.trace(msg)
 }

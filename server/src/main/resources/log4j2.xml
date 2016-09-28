@@ -12,7 +12,7 @@
                 <Charset>utf-8</Charset>
                 <alwaysWriteExceptions>true</alwaysWriteExceptions>
                 <Pattern>
-                    %highlight{%-6p}{TRACE=black, TIMING=black, DEBUG=cyan, INFO=green, ACCESS=blue, AUDIT=blue, WARN=yellow, ERROR=red, FATAL=red} [%d{ISO8601}] - %m --- [%t] %c - %K%n
+                    %highlight{%-6p}{TRACE=black, DEBUG=cyan, INFO=green, WARN=yellow, ERROR=red} [%d{ISO8601}] - %m --- [%t] %c - %K%n
                 </Pattern>
             </PatternLayout>
         </Console>
