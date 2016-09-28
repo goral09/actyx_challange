@@ -18,6 +18,7 @@ import org.http4s.circe.jsonOf
 import org.http4s.client.blaze._
 
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration._
 
 class MachinesEndpoint(
   apiRoot: URL,
@@ -29,26 +30,39 @@ class MachinesEndpoint(
 
   private lazy val client = PooledHttp1Client()
   private lazy val tickSource =
-    Observable.interval(FiniteDuration(samplingFrequency.interval.toLong * 1000, TimeUnit.MILLISECONDS))
+    Observable.intervalAtFixedRate(samplingFrequency.asFiniteDuration)
 
   private val machinesList: monix.eval.Task[List[MachineEndpoint]] =
     monix.eval.Task.evalAlways(client.expect[List[MachineEndpoint]](machinesEndpoint.toString).run)
+	  .onErrorHandleWith { ex ⇒
+	    logger.error(s"Encountered an error when requesting machines list.", ex)
+		  monix.eval.Task.raiseError(ex)
+	  }
 
-  private def machineRequest(url: URL): monix.eval.Task[Machine] =
+  private def getMachineState(url: URL): monix.eval.Task[Machine] =
     monix.eval.Task.evalAlways(client.expect[Machine](url.toString).run)
-    .onErrorHandleWith {
-      case ex@org.http4s.client.UnexpectedStatus(status) if status.code == 429 ⇒
-        machineRequest(url).delayExecution(FiniteDuration(5000L, TimeUnit.MILLISECONDS))
-    }
+      .onErrorHandleWith {
+        case ex@org.http4s.client.UnexpectedStatus(status) if status.code == 429 ⇒
+          logger.error("Too many requests.", ex)
+          getMachineState(url).delayExecution(FiniteDuration(5000L, TimeUnit.MILLISECONDS))
+        case ex ⇒
+		      logger.error("Unknown error.", ex)
+		      monix.eval.Task.raiseError(ex)
+      }
 
   override def unsafeSubscribeFn(subscriber: Subscriber[(MachineID, Machine)]): Cancelable =
-    Observable.fromTask(machinesList).flatMap { endpoints ⇒
-      Observable.fromIterable(endpoints)
-        .map { e ⇒ e.getID -> machineRequest(e.toURL(apiRoot))}
+	  Observable.fromTask(machinesList)
+		  .flatMap { endpoints ⇒
+			  tickSource.flatMap { _ ⇒
+				  Observable.fromIterable(endpoints)
+			  }.map { machineEndpoint ⇒
+	          machineEndpoint.getID -> getMachineState(machineEndpoint.toURL(apiRoot))
+        }
         .flatMap { case (uuid, r) ⇒
           Observable.fromTask(r.map(uuid -> _))
         }
-      }.subscribe(subscriber)
+      }
+	  .subscribe(subscriber)
 }
 
 object MachinesEndpoint {
