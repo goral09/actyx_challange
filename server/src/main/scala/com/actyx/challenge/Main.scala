@@ -41,7 +41,9 @@ object Main extends App with Logger {
 
 
 	val serverBindings = Http()
-	  .bindAndHandle(Route.handlerFlow(route), config.serverConfig.host, config.serverConfig.port)
+	  .bindAndHandle(Route.handlerFlow(route),
+		                config.serverConfig.host,
+		                config.serverConfig.port)
 		.map { binding ⇒
 		  logger.info(s"Entrypoint UP on ${config.serverConfig.host}:${config.serverConfig.port}")
 	    binding
