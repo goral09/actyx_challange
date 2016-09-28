@@ -33,6 +33,7 @@ lazy val client = (project in file ("client"))
   .dependsOn(sharedJs)
 
 lazy val server = (project in file("server"))
+  .enablePlugins(JavaServerAppPackaging)
   .settings(commonSettings:_*)
   .settings(
     resolvers ++= Seq(
@@ -52,6 +53,6 @@ lazy val server = (project in file("server"))
 
 lazy val root =
   (project in file("."))
-  .aggregate(client, server)
+		.aggregate(client, server)
 
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
