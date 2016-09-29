@@ -7,8 +7,8 @@ import com.actyx.challenge.util._
 
 class Config private(
 	val actyxParkConfig: Config.ActyxMachineParkAPIConfig,
-	val serverConfig: Config.ServerConfig
-)
+	val serverConfig: Config.ServerConfig,
+	val envCtxt: Config.EnvContext)
 
 object Config {
 	case class ActyxMachineParkAPIConfig(
@@ -19,6 +19,19 @@ object Config {
 	case class ServerConfig(
 		host: String,
 		port: Int)
+
+	sealed trait EnvContext
+	case object EnvContext {
+		def apply(in: String): EnvContext = in.toLowerCase match {
+			case "test" ⇒ Test
+			case "prod" ⇒ Prod
+		}
+
+		case object Test extends EnvContext
+		case object Prod extends EnvContext {
+			override def toString: String = "Production"
+		}
+	}
 
 	def apply()(implicit conf: TypeSafeConfig) = {
 		val actyxConfig = {
@@ -38,7 +51,13 @@ object Config {
 			ServerConfig(host, port)
 		}
 
-		new Config(actyxConfig, serverConfig)
+		val envCtxt = {
+			val ctxt = conf.systemProperty("env").map(EnvContext.apply(_)).get
+			Logger.info(s"Running in $ctxt context.")
+			ctxt
+		}
+
+		new Config(actyxConfig, serverConfig, envCtxt)
 	}
 
 }

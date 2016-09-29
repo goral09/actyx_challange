@@ -7,6 +7,7 @@ import com.actyx.challenge.models.{Machine, MachineAlarm}
 import de.heikoseeberger.akkasse.{EventStreamMarshalling, ServerSentEvent, _}
 import EventStreamMarshalling._
 import com.actyx.challenge.api.MachineAlarmsService.State
+import com.actyx.challenge.config.Config.EnvContext
 import io.circe.Encoder
 import com.actyx.challenge.mappings._
 import com.actyx.challenge.models.Machine.MachineID
@@ -18,7 +19,8 @@ import monix.execution.atomic.AtomicAny
 import scala.concurrent.duration._
 
 class MachineAlarmsService(
-	config: Config.ServerConfig,
+	serverConfig: Config.ServerConfig,
+	ctxt: EnvContext,
 	movingAvgWindowSize: FiniteDuration)(
 	machines0: Observable[(MachineID, Machine)]) extends Logger {
 
@@ -45,9 +47,11 @@ class MachineAlarmsService(
 		.foreach(_.foreach(d ⇒ averages.get.update(d._1 → d._2)))
 
 	// testing purposes
-	machines
-		.filter  { case (id, m) ⇒ m.current > m.currentAlert }
-	  .foreach { case (id, m) ⇒ logger.debug(s"$id \t ${m.timestamp} \t ${m.current}")}
+	if(ctxt.isInstanceOf[Config.EnvContext.Test.type]) {
+		machines
+			.filter  { case (id, m) ⇒ m.current > m.currentAlert }
+			.foreach { case (id, m) ⇒ logger.info(s"$id \t ${m.timestamp} \t ${m.current}")}
+	}
 
 	val route =
 		pathPrefix("api" / "v1") {
