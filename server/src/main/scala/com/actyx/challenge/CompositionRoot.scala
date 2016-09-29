@@ -2,7 +2,7 @@ package com.actyx.challenge
 
 import java.net.URL
 
-import com.actyx.challenge.api.MachinesEndpoint
+import com.actyx.challenge.web.api.MachinesEndpoint
 import com.actyx.challenge.config.Config
 import com.actyx.challenge.util.Frequency
 

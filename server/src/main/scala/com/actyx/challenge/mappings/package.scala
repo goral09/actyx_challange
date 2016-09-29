@@ -2,7 +2,7 @@ package com.actyx.challenge
 
 import java.net.URI
 
-import com.actyx.challenge.api.MachinesEndpoint.MachineEndpoint
+import com.actyx.challenge.web.api.MachinesEndpoint.MachineEndpoint
 import com.actyx.challenge.models._
 import io.circe._
 import io.circe.generic.semiauto._

@@ -11,7 +11,7 @@ import akka.stream.ActorMaterializer
 import ch.megard.akka.http.cors.CorsSettings
 import com.actyx.challenge.CompositionRoot
 import com.actyx.challenge.Main._
-import com.actyx.challenge.api.MachineAlarmsService
+import com.actyx.challenge.web.api.MachineAlarmsService
 import com.actyx.challenge.config.Config
 
 class WebMain(root: CompositionRoot,
