@@ -54,10 +54,14 @@ object Dependencies {
 		"com.typesafe.scala-logging" %% "scala-logging" % VersionOf.`scala-logging`,
 		"com.lmax" % "disruptor" % VersionOf.disruptor) // async logging
 
+	lazy val elasticLibs = Seq(
+		"com.sksamuel.elastic4s" %% "elastic4s-core" % VersionOf.elastic4s)
+
   lazy val `typesafe-config` = Seq(
     "com.typesafe" % "config" % VersionOf.`typesafe-config`)
 
-  lazy val dependencies = monixDependencies ++
+  lazy val dependencies =
+	  monixDependencies ++
     circeDependencies ++
 	  `akka-sse` ++
     `akka-http`  ++
@@ -67,6 +71,7 @@ object Dependencies {
 		`typesafe-config` ++
 	  loggingLibs ++
     dateTimeDependencies ++
-		shapelessLibs
+		shapelessLibs ++
+	  elasticLibs
 
 }
