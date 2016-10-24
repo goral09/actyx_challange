@@ -14,7 +14,8 @@ import com.actyx.challenge.Main._
 import com.actyx.challenge.web.api.MachineAlarmsService
 import com.actyx.challenge.config.Config
 
-class WebMain(root: CompositionRoot,
+class WebMain(
+	root: CompositionRoot,
 	config:Config) {
 
 	implicit val system = ActorSystem()

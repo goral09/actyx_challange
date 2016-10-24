@@ -12,7 +12,6 @@ import scala.scalajs.js.JSApp
 
 object Sample extends JSApp {
   override def main(): Unit = {
-	  // TODO: get from config
 	  val protocol = dom.window.location.protocol
 	  val host = dom.window.location.host
 	  val alarms: Observable[MachineAlarm] =
